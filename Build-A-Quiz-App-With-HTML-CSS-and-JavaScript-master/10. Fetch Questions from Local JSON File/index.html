@@ -4,13 +4,140 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Quick Quiz</title>
+    <title>Saar Quiz</title>
     <link rel="stylesheet" href="app.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+      /* --- GLOBAL RESET & TYPOGRAPHY --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        /* Soft gradient background: light blue to white */
+        background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+        color: #1e293b;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        overflow-x: hidden;
+      }
+
+      /* --- CONTAINER & LAYOUT --- */
+      .container {
+        width: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .flex-center {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      .flex-column {
+        flex-direction: column;
+      }
+
+      /* --- PREMIUM CARD UI --- */
+      #home {
+        background: #ffffff;
+        width: 100%;
+        max-width: 380px; /* Perfect mobile-first size */
+        padding: 40px 30px;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        text-align: center;
+        /* Smooth fade-in animation on load */
+        opacity: 0;
+        animation: cardFadeIn 0.6s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      @keyframes cardFadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* --- LOGO & BRANDING --- */
+      .brand-logo {
+        height: 70px;
+        width: auto;
+        object-fit: contain;
+        margin-bottom: 16px;
+        border-radius: 12px;
+      }
+
+      h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 4px;
+        letter-spacing: -0.5px;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+        margin-bottom: 32px;
+      }
+
+      /* --- BUTTON DESIGN --- */
+      .btn {
+        width: 100%;
+        display: block;
+        padding: 14px 20px;
+        margin-bottom: 16px;
+        border-radius: 10px;
+        /* Blue to Purple Gradient */
+        background: linear-gradient(90deg, #2563eb, #8b5cf6);
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 1.05rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+        transition: all 0.3s ease;
+      }
+
+      .btn:last-child {
+        margin-bottom: 0;
+      }
+
+      /* Hover & Touch Animations */
+      .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+      }
+
+      .btn:active {
+        transform: scale(0.96);
+        box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+      }
+    </style>
   </head>
   <body>
     <div class="container">
       <div id="home" class="flex-center flex-column">
-        <h1>Quick Quiz</h1>
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczO6W8wQSIuYgjT3z8r_saT5ge2-gnQs6qi4ABCi6P-qsKf-SRDt6Tih36nBSUKa7-Nh2KWCUNOVqFR2Gl0613QTnQMvLkMkCiCAsGexfT8ohtSeVCy0_EZYKW3YejwrBG9layhFrNwr3g9bv2QZUuA=w509-h273-s-no-gm?authuser=0" alt="Saar Logo" class="brand-logo" />
+        
+        <h1>Saar Quiz</h1>
+        <p class="subtitle">Smart Learning with Saar</p>
+        
         <a class="btn" href="/game.html">Play</a>
         <a class="btn" href="/highscores.html">High Scores</a>
       </div>
