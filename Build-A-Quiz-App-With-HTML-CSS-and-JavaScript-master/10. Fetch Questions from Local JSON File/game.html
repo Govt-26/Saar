@@ -2,34 +2,258 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Quick Quiz - Play</title>
+    <title>Saar Quiz - Play</title>
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="game.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+      /* --- GLOBAL RESET & TYPOGRAPHY --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #f0f4ff 0%, #f8fafc 100%);
+        color: #1e293b;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 480px; /* Optimal for mobile/tablet */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* --- SAAR BRANDING --- */
+      .brand-header {
+        text-align: center;
+        margin-bottom: 24px;
+        animation: fadeDown 0.6s ease-out forwards;
+      }
+
+      .brand-logo {
+        height: 50px;
+        width: auto;
+        border-radius: 10px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      }
+
+      .brand-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 2px;
+        letter-spacing: -0.5px;
+      }
+
+      .brand-subtitle {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+      }
+
+      /* --- QUIZ CARD UI --- */
+      .quiz-card {
+        background: #ffffff;
+        width: 100%;
+        border-radius: 20px;
+        padding: 30px 24px;
+        box-shadow: 0 12px 35px rgba(37, 99, 235, 0.08);
+        border: 1px solid rgba(255,255,255,0.8);
+        animation: scaleUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      /* --- HUD (HEADS UP DISPLAY) --- */
+      #hud {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 30px;
+        padding-bottom: 20px;
+        border-bottom: 2px dashed #f1f5f9;
+      }
+
+      .hud-item {
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hud-prefix {
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #94a3b8;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+      }
+
+      /* Progress Bar */
+      #progressBar {
+        width: 120px;
+        height: 10px;
+        background: #f1f5f9;
+        border-radius: 50px;
+        overflow: hidden;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+      }
+
+      #progressBarFull {
+        height: 100%;
+        background: linear-gradient(90deg, #2563eb, #8b5cf6);
+        width: 0%;
+        border-radius: 50px;
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      /* Score */
+      .hud-main-text {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #2563eb;
+      }
+
+      /* --- QUESTION TEXT --- */
+      #question {
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: #0f172a;
+        margin-bottom: 24px;
+        line-height: 1.5;
+      }
+
+      /* --- CHOICES (BUTTONS) --- */
+      .choice-container {
+        display: flex;
+        align-items: center;
+        width: 100%;
+        background: #f8fafc;
+        border: 2px solid #e2e8f0;
+        border-radius: 14px;
+        margin-bottom: 14px;
+        padding: 12px 16px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .choice-container:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(37, 99, 235, 0.08);
+      }
+
+      .choice-container:active {
+        transform: scale(0.98);
+      }
+
+      .choice-prefix {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        width: 32px;
+        height: 32px;
+        background: #e2e8f0;
+        color: #475569;
+        font-weight: 700;
+        font-size: 0.9rem;
+        border-radius: 8px;
+        margin-right: 16px;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+      }
+
+      .choice-container:hover .choice-prefix {
+        background: #2563eb;
+        color: #ffffff;
+      }
+
+      .choice-text {
+        font-size: 1rem;
+        font-weight: 500;
+        color: #334155;
+        width: 100%;
+      }
+
+      /* --- JS FEEDBACK CLASSES (CORRECT / WRONG) --- */
+      .correct {
+        background: #f0fdf4 !important;
+        border-color: #22c55e !important;
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.15) !important;
+      }
+      .correct .choice-prefix {
+        background: #22c55e !important;
+        color: #ffffff !important;
+      }
+      .correct .choice-text { color: #15803d !important; font-weight: 600; }
+
+      .incorrect {
+        background: #fef2f2 !important;
+        border-color: #ef4444 !important;
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.15) !important;
+      }
+      .incorrect .choice-prefix {
+        background: #ef4444 !important;
+        color: #ffffff !important;
+      }
+      .incorrect .choice-text { color: #b91c1c !important; font-weight: 600; }
+
+      /* --- ANIMATIONS --- */
+      @keyframes fadeDown {
+        from { opacity: 0; transform: translateY(-15px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+
+      @keyframes scaleUp {
+        from { opacity: 0; transform: scale(0.95) translateY(10px); }
+        to { opacity: 1; transform: scale(1) translateY(0); }
+      }
+
+      /* Utility class used by game.js to hide elements before load */
+      .hidden {
+        display: none !important;
+      }
+    </style>
   </head>
   <body>
     <div class="container">
-      <div id="game" class="justify-center flex-column">
+      
+      <div class="brand-header">
+        <img src="https://lh3.googleusercontent.com/pw/AP1GczO6W8wQSIuYgjT3z8r_saT5ge2-gnQs6qi4ABCi6P-qsKf-SRDt6Tih36nBSUKa7-Nh2KWCUNOVqFR2Gl0613QTnQMvLkMkCiCAsGexfT8ohtSeVCy0_EZYKW3YejwrBG9layhFrNwr3g9bv2QZUuA=w509-h273-s-no-gm?authuser=0" alt="Saar Logo" class="brand-logo" />
+        <h1 class="brand-title">Saar Quiz</h1>
+        <p class="brand-subtitle">Smart Learning with Saar</p>
+      </div>
+
+      <div id="game" class="quiz-card hidden">
+        
         <div id="hud">
-          <div id="hud-item">
-            <p id="progressText" class="hud-prefix">
-              Question
-            </p>
+          <div class="hud-item">
+            <p id="progressText" class="hud-prefix">Question</p>
             <div id="progressBar">
               <div id="progressBarFull"></div>
             </div>
           </div>
-          <div id="hud-item">
-            <p class="hud-prefix">
-              Score
-            </p>
-            <h1 class="hud-main-text" id="score">
-              0
-            </h1>
+          <div class="hud-item" style="align-items: flex-end;">
+            <p class="hud-prefix">Score</p>
+            <h1 class="hud-main-text" id="score">0</h1>
           </div>
         </div>
-        <h2 id="question">What is the answer to this questions?</h2>
+
+        <h2 id="question">Loading Question...</h2>
+        
         <div class="choice-container">
           <p class="choice-prefix">A</p>
           <p class="choice-text" data-number="1">Choice 1</p>
@@ -46,8 +270,10 @@
           <p class="choice-prefix">D</p>
           <p class="choice-text" data-number="4">Choice 4</p>
         </div>
+        
       </div>
     </div>
+    
     <script src="game.js"></script>
   </body>
 </html>
