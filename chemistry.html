@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Saar Chemistry | Premium</title>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-light: #60a5fa;
+            --secondary: #8b5cf6;
+            --surface: #ffffff;
+            --bg-main: #f8fafc;
+            --text-strong: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --accent-bg: #eff6ff;
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.02);
+            --shadow-md: 0 8px 16px rgba(0, 0, 0, 0.06);
+            --shadow-hover: 0 12px 24px rgba(37, 99, 235, 0.08);
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-main);
+            color: var(--text-strong);
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            opacity: 0;
+            animation: pageLoad 0.6s ease-out forwards;
+        }
+
+        @keyframes pageLoad {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* --- HEADER --- */
+        header {
+            background-color: var(--surface);
+            padding: 12px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 1px solid var(--border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .logo {
+            height: 32px;
+            width: auto;
+            object-fit: contain;
+            display: block;
+        }
+
+        .menu-btn {
+            color: var(--text-strong);
+            padding: 4px;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        
+        .menu-btn:active { transform: scale(0.9); }
+
+        /* --- CHEMISTRY HERO SECTION --- */
+        .hero-wrapper {
+            padding: 16px;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .chem-hero {
+            position: relative;
+            width: 100%;
+            height: 140px;
+            border-radius: var(--radius-lg);
+            background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .reaction-lines {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0.6;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, rgba(37, 99, 235, 0) 70%);
+            animation: float 5s infinite ease-in-out alternate;
+            z-index: 1;
+        }
+
+        .p1 { width: 80px; height: 80px; top: -20px; left: 5%; animation-delay: 0s; }
+        .p2 { width: 60px; height: 60px; bottom: -10px; right: 25%; animation-delay: -2s; }
+        .p3 { width: 100px; height: 100px; top: 30%; left: 45%; animation-delay: -4s; }
+
+        @keyframes float {
+            0% { transform: translateY(0px) scale(1); }
+            100% { transform: translateY(-12px) scale(1.05); }
+        }
+
+        .hero-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            position: relative;
+            z-index: 2;
+        }
+
+        .hero-text h2 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--text-strong);
+            margin-bottom: 2px;
+            letter-spacing: -0.5px;
+        }
+
+        .hero-text p {
+            font-size: 0.85rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .hero-logo {
+            height: 48px;
+            width: auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            background: var(--surface);
+            padding: 4px;
+        }
+
+        /* --- TAB BAR --- */
+        .tab-container {
+            background: var(--surface);
+            position: sticky;
+            top: 57px;
+            z-index: 900;
+            border-bottom: 1px solid var(--border);
+            padding: 0 4px;
+        }
+
+        .tabs {
+            display: flex;
+            position: relative;
+            width: 100%;
+        }
+
+        .tab-item {
+            flex: 1;
+            text-align: center;
+            padding: 14px 0;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            cursor: pointer;
+            transition: color var(--transition-smooth);
+            user-select: none;
+            white-space: nowrap;
+        }
+
+        .tab-item.active {
+            color: var(--primary);
+        }
+
+        .tab-indicator {
+            position: absolute;
+            bottom: 0;
+            height: 3px;
+            background-color: var(--primary);
+            border-radius: 3px 3px 0 0;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* --- MAIN CONTENT SECTIONS --- */
+        main {
+            padding: 16px;
+            padding-bottom: 40px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        /* Staggered slide-up for elements inside active section */
+        .section.active .animate-up {
+            animation: slideUp 0.5s ease-out forwards;
+            opacity: 0;
+            transform: translateY(15px);
+        }
+
+        .section.active .d-1 { animation-delay: 0.05s; }
+        .section.active .d-2 { animation-delay: 0.1s; }
+        .section.active .d-3 { animation-delay: 0.15s; }
+        .section.active .d-4 { animation-delay: 0.2s; }
+
+        @keyframes slideUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- OVERVIEW HEADER TEXT --- */
+        .overview-header { margin-bottom: 24px; }
+        .page-title { font-size: 1.35rem; font-weight: 700; color: var(--text-strong); margin-bottom: 2px; letter-spacing: -0.3px;}
+        .page-subtitle { font-size: 0.85rem; font-weight: 600; color: var(--primary); margin-bottom: 12px; }
+        .page-desc { font-size: 0.85rem; color: var(--text-muted); line-height: 1.6; }
+
+        /* --- REALISTIC CHAT UI --- */
+        .chat-container { display: flex; flex-direction: column; gap: 16px; margin-bottom: 28px; }
+        .chat-row { display: flex; align-items: flex-end; gap: 10px; max-width: 85%; }
+        .chat-row.left { align-self: flex-start; }
+        .chat-row.right { align-self: flex-end; flex-direction: row-reverse; }
+        
+        .chat-avatar {
+            width: 32px; height: 32px; border-radius: 50%; flex-shrink: 0;
+            box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--border);
+        }
+        
+        .chat-avatar img {
+            width: 100%; height: 100%; object-fit: cover;
+        }
+
+        .chat-bubble {
+            padding: 12px 16px; border-radius: 18px; font-size: 0.85rem; line-height: 1.4; box-shadow: var(--shadow-sm); font-weight: 500;
+        }
+        .chat-row.left .chat-bubble { background-color: var(--surface); color: var(--text-strong); border: 1px solid var(--border); border-bottom-left-radius: 4px; }
+        .chat-row.right .chat-bubble { background: linear-gradient(135deg, var(--primary), #1d4ed8); color: #ffffff; border-bottom-right-radius: 4px; }
+
+        /* --- PREMIUM FEATURE CARDS --- */
+        .feature-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 14px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.02);
+            transition: all var(--transition-smooth);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card:hover, .feature-card:active {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            border-color: rgba(37, 99, 235, 0.1);
+        }
+
+        .icon-box {
+            width: 40px; height: 40px; border-radius: 10px; background: linear-gradient(135deg, #eff6ff, #e0e7ff);
+            color: var(--primary); display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+        }
+        .feature-card-content { flex: 1; }
+        .feature-card-title { font-size: 0.9rem; font-weight: 700; color: var(--text-strong); margin-bottom: 2px;}
+        .feature-card-subtitle { font-size: 0.75rem; color: var(--text-muted); line-height: 1.3;}
+
+        /* --- PREMIUM CHAPTER CARDS --- */
+        .chapter-card {
+            background: var(--surface);
+            border-radius: var(--radius-md);
+            padding: 12px 16px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid rgba(0,0,0,0.02);
+            position: relative;
+            overflow: hidden;
+            height: 76px;
+            transition: all var(--transition-smooth);
+        }
+
+        .chapter-card::before {
+            content: ''; position: absolute; left: 0; top: 0; bottom: 0; width: 4px;
+            background: linear-gradient(to bottom, var(--primary), var(--secondary));
+        }
+
+        .chapter-card:hover, .chapter-card:active {
+            transform: translateY(-2px) scale(0.99);
+            box-shadow: var(--shadow-md);
+        }
+
+        .chap-icon {
+            width: 40px; height: 40px; border-radius: 10px; background: var(--accent-bg);
+            color: var(--primary); display: flex; justify-content: center; align-items: center; flex-shrink: 0;
+        }
+        .chap-title { font-size: 0.95rem; font-weight: 600; color: var(--text-strong); }
+        .chap-sub { font-size: 0.75rem; color: var(--primary); font-weight: 500; margin-top: 2px; }
+
+        /* --- SAAR PROGRESS BAR & FEATURES --- */
+        .saar-card {
+            background: var(--surface); border-radius: var(--radius-md); padding: 24px 20px;
+            box-shadow: var(--shadow-sm); border: 1px solid rgba(0,0,0,0.02);
+        }
+        
+        .progress-track {
+            width: 100%; height: 8px; background-color: var(--border); border-radius: 8px; margin-top: 16px; overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; width: 0%; background: linear-gradient(90deg, var(--primary), var(--secondary)); 
+            border-radius: 8px; transition: width 1.5s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .saar-features {
+            list-style: none; margin-top: 24px;
+        }
+
+        .saar-features li {
+            display: flex; align-items: center; gap: 12px; font-size: 0.85rem; color: var(--text-strong);
+            font-weight: 500; margin-bottom: 14px;
+        }
+
+        .saar-features i { color: var(--primary); }
+
+        /* --- GLASSMORPHISM MENU DRAWER --- */
+        .drawer-overlay {
+            position: fixed; inset: 0; background: rgba(15, 23, 42, 0.3); z-index: 2000; display: none; opacity: 0; transition: opacity 0.3s;
+        }
+        .drawer {
+            position: fixed; top: 0; right: -100%; width: 75%; max-width: 320px; height: 100%; 
+            background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            z-index: 2001; padding: 24px; transition: right 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1); border-left: 1px solid rgba(255,255,255,0.5);
+        }
+        .drawer.open { right: 0; }
+        .drawer-overlay.open { display: block; opacity: 1; }
+        
+        .drawer-header { display: flex; justify-content: flex-end; margin-bottom: 30px; }
+        
+        .drawer-link {
+            display: flex; align-items: center; gap: 14px; padding: 16px 16px; color: var(--text-strong); 
+            text-decoration: none; font-weight: 600; font-size: 1rem; border-radius: 12px; margin-bottom: 8px;
+            transition: all 0.2s;
+        }
+        .drawer-link:hover, .drawer-link:active {
+            background-color: var(--surface); color: var(--primary); box-shadow: var(--shadow-sm); transform: translateX(5px);
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="header-left">
+            <img src="https://lh3.googleusercontent.com/pw/AP1GczO6W8wQSIuYgjT3z8r_saT5ge2-gnQs6qi4ABCi6P-qsKf-SRDt6Tih36nBSUKa7-Nh2KWCUNOVqFR2Gl0613QTnQMvLkMkCiCAsGexfT8ohtSeVCy0_EZYKW3YejwrBG9layhFrNwr3g9bv2QZUuA=w509-h273-s-no-gm?authuser=0" alt="Saar Logo" class="logo">
+        </div>
+        <div class="menu-btn" id="menuBtn">
+            <i data-lucide="menu" stroke-width="2.5"></i>
+        </div>
+    </header>
+
+    <div class="drawer-overlay" id="drawerOverlay"></div>
+    <div class="drawer" id="drawerMenu">
+        <div class="drawer-header">
+            <i data-lucide="x" id="closeBtn" style="cursor: pointer; color: var(--text-strong); transition: transform 0.2s;"></i>
+        </div>
+        <nav>
+            <a href="https://govt-26.github.io/Saar/index.html" class="drawer-link">
+                <i data-lucide="home" size="20"></i> Home
+            </a>
+            <a href="https://govt-26.github.io/Saar/phy.html" class="drawer-link">
+                <i data-lucide="atom" size="20"></i> Physics
+            </a>
+            <a href="https://govt-26.github.io/Saar/math.html" class="drawer-link">
+                <i data-lucide="calculator" size="20"></i> Mathematics
+            </a>
+            <a href="https://govt-26.github.io/Saar/siten.html" class="drawer-link">
+                <i data-lucide="users" size="20"></i> Class 6–10
+            </a>
+        </nav>
+    </div>
+
+    <div class="hero-wrapper">
+        <div class="chem-hero">
+            <div class="particle p1"></div>
+            <div class="particle p2"></div>
+            <div class="particle p3"></div>
+            
+            <svg class="reaction-lines" viewBox="0 0 200 100" preserveAspectRatio="none">
+                <path d="M-10,40 Q40,10 90,50 T210,30" stroke="rgba(37, 99, 235, 0.08)" stroke-width="2" fill="none"/>
+                <circle cx="90" cy="50" r="3" fill="rgba(37, 99, 235, 0.15)"/>
+                <path d="M-10,80 Q50,110 100,60 T210,80" stroke="rgba(139, 92, 246, 0.06)" stroke-width="2" fill="none"/>
+                <circle cx="100" cy="60" r="2" fill="rgba(139, 92, 246, 0.15)"/>
+            </svg>
+
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h2>Chemistry</h2>
+                    <p>Smart Learning with Saar</p>
+                </div>
+                <img src="https://lh3.googleusercontent.com/pw/AP1GczO6W8wQSIuYgjT3z8r_saT5ge2-gnQs6qi4ABCi6P-qsKf-SRDt6Tih36nBSUKa7-Nh2KWCUNOVqFR2Gl0613QTnQMvLkMkCiCAsGexfT8ohtSeVCy0_EZYKW3YejwrBG9layhFrNwr3g9bv2QZUuA=w509-h273-s-no-gm?authuser=0" alt="Saar Logo" class="hero-logo">
+            </div>
+        </div>
+    </div>
+
+    <div class="tab-container">
+        <div class="tabs" id="tabGroup">
+            <div class="tab-item active" data-target="overview">Overview</div>
+            <div class="tab-item" data-target="content">Content</div>
+            <div class="tab-item" data-target="important">Important</div>
+            <div class="tab-item" data-target="saar">Saar</div>
+            <div class="tab-indicator" id="tabIndicator"></div>
+        </div>
+    </div>
+
+    <main>
+        <section id="overview" class="section active">
+            
+            <div class="overview-header animate-up d-1">
+                <h1 class="page-title">Class 12 Chemistry</h1>
+                <div class="page-subtitle">with Vishal Surya</div>
+                <div class="page-desc">A structured and concept-driven learning experience designed to simplify complex chemistry topics, strengthen fundamentals, and ensure exam-level mastery for Class 12 students.</div>
+            </div>
+
+            <div class="chat-container animate-up d-2">
+                <div class="chat-row left">
+                    <div class="chat-avatar">
+                        <img src="https://images.unsplash.com/photo-1531427186611-ecfd6d936c79?w=100&h=100&fit=crop&crop=faces" alt="Student">
+                    </div>
+                    <div class="chat-bubble">Baba, is chemistry easy?</div>
+                </div>
+                <div class="chat-row right">
+                    <div class="chat-avatar">
+                        <img src="https://images.unsplash.com/photo-1568602471122-7832951cc4c5?w=100&h=100&fit=crop&crop=faces" alt="Mentor">
+                    </div>
+                    <div class="chat-bubble">With Saar, everything becomes simple and clear.</div>
+                </div>
+            </div>
+
+            <div class="feature-card animate-up d-3">
+                <div class="icon-box"><i data-lucide="brain" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="feature-card-title">Concept Driven Learning</div>
+                    <div class="feature-card-subtitle">Understand core concepts with clarity and logic</div>
+                </div>
+            </div>
+            
+            <div class="feature-card animate-up d-3">
+                <div class="icon-box"><i data-lucide="target" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="feature-card-title">Exam-Focused Preparation</div>
+                    <div class="feature-card-subtitle">Target important topics and scoring areas</div>
+                </div>
+            </div>
+            
+            <div class="feature-card animate-up d-4">
+                <div class="icon-box"><i data-lucide="book-open" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="feature-card-title">Smart Revision System</div>
+                    <div class="feature-card-subtitle">Quick and effective revision strategies</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="content" class="section">
+            <div class="chapter-card animate-up d-1">
+                <div class="chap-icon"><i data-lucide="book" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="chap-title">Chapter 1</div>
+                    <div class="chap-sub">View PDF</div>
+                </div>
+                <i data-lucide="chevron-right" size="20" color="#cbd5e1"></i>
+            </div>
+            <div class="chapter-card animate-up d-2">
+                <div class="chap-icon"><i data-lucide="beaker" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="chap-title">Chapter 2</div>
+                    <div class="chap-sub">View PDF</div>
+                </div>
+                <i data-lucide="chevron-right" size="20" color="#cbd5e1"></i>
+            </div>
+        </section>
+
+        <section id="important" class="section">
+            <div class="feature-card animate-up d-1">
+                <div class="icon-box" style="background: #fff1f2; color: #e11d48;"><i data-lucide="help-circle" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="feature-card-title">Important Questions</div>
+                    <div class="feature-card-subtitle">Content will be updated</div>
+                </div>
+            </div>
+            <div class="feature-card animate-up d-2">
+                <div class="icon-box" style="background: #fdf4ff; color: #c026d3;"><i data-lucide="crosshair" size="20"></i></div>
+                <div class="feature-card-content">
+                    <div class="feature-card-title">Board Specifics</div>
+                    <div class="feature-card-subtitle">Content will be updated</div>
+                </div>
+            </div>
+        </section>
+
+        <section id="saar" class="section">
+            <div class="saar-card animate-up d-1">
+                <div class="page-title" style="font-size: 1.15rem; text-align: center;">Your Journey to Mastery</div>
+                
+                <div class="progress-track">
+                    <div class="progress-fill" id="saarProgress"></div>
+                </div>
+
+                <ul class="saar-features">
+                    <li class="animate-up d-2"><i data-lucide="check-circle-2" size="20"></i> Concept clarity</li>
+                    <li class="animate-up d-3"><i data-lucide="check-circle-2" size="20"></i> Important questions</li>
+                    <li class="animate-up d-4"><i data-lucide="check-circle-2" size="20"></i> Exam readiness</li>
+                </ul>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        lucide.createIcons();
+
+        // Menu Logic
+        const menuBtn = document.getElementById('menuBtn');
+        const closeBtn = document.getElementById('closeBtn');
+        const drawerMenu = document.getElementById('drawerMenu');
+        const drawerOverlay = document.getElementById('drawerOverlay');
+
+        function toggleMenu() {
+            drawerMenu.classList.toggle('open');
+            drawerOverlay.classList.toggle('open');
+        }
+
+        menuBtn.addEventListener('click', toggleMenu);
+        closeBtn.addEventListener('click', toggleMenu);
+        drawerOverlay.addEventListener('click', toggleMenu);
+
+        // Tab System Logic
+        const tabs = document.querySelectorAll('.tab-item');
+        const sections = document.querySelectorAll('.section');
+        const indicator = document.getElementById('tabIndicator');
+
+        function updateIndicator(tab) {
+            indicator.style.width = `${tab.offsetWidth}px`;
+            indicator.style.left = `${tab.offsetLeft}px`;
+        }
+
+        // Initialize indicator
+        window.addEventListener('load', () => {
+            const activeTab = document.querySelector('.tab-item.active');
+            updateIndicator(activeTab);
+        });
+
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                // Update tab states
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                updateIndicator(tab);
+
+                // Re-trigger CSS animations by removing and re-adding active class
+                const target = tab.getAttribute('data-target');
+                sections.forEach(sec => {
+                    if (sec.id === target) {
+                        sec.classList.remove('active');
+                        void sec.offsetWidth; // Trigger reflow to restart animation
+                        sec.classList.add('active');
+                    } else {
+                        sec.classList.remove('active');
+                    }
+                });
+
+                // Fire Saar Tab Progress Animation 
+                if (target === 'saar') {
+                    setTimeout(() => {
+                        document.getElementById('saarProgress').style.width = '100%';
+                    }, 100);
+                } else {
+                    document.getElementById('saarProgress').style.width = '0%';
+                }
+            });
+        });
+
+        // Add touch active state handling for mobile devices to remove tap delay feeling
+        document.querySelectorAll('.feature-card, .chapter-card, .drawer-link').forEach(el => {
+            el.addEventListener('touchstart', () => {}, {passive: true});
+        });
+    </script>
+</body>
+</html>
