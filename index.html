@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Divine Path - Immersive Architecture</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/objects/Reflector.js"></script>
+
+    <style>
+        :root {
+            --bg-color: #F8F9FA; --surface: #FFFFFF; --text-main: #1A1E23; --text-muted: #6C757D;
+            --gold: #C5A059; --gold-light: #E8D5A5; --shadow-sm: 0 4px 12px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.08); --radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: 'Inter', sans-serif; background: var(--bg-color); color: var(--text-main); overflow-x: hidden; line-height: 1.6; }
+        h1, h2, h3, h4, .serif { font-family: 'Cinzel', serif; }
+
+        /* UI & NAVIGATION */
+        header { position: fixed; top: 0; width: 100%; background: rgba(255, 255, 255, 0.98); backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; padding: 16px 24px; z-index: 1000; box-shadow: var(--shadow-sm); }
+        .logo-text { color: var(--gold); font-weight: 700; font-size: 1.25rem; letter-spacing: 1px; }
+        .menu-btn { background: none; border: none; cursor: pointer; display: flex; flex-direction: column; gap: 5px; }
+        .menu-line { width: 24px; height: 2px; background-color: var(--text-main); transition: var(--transition); }
+        
+        #side-nav { position: fixed; top: 0; right: -100%; width: 280px; height: 100vh; background: var(--surface); z-index: 2000; transition: right 0.4s ease; box-shadow: -10px 0 40px rgba(0,0,0,0.1); padding: 80px 24px 24px; }
+        #side-nav.open { right: 0; }
+        .nav-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 1500; display: none; opacity: 0; transition: opacity 0.3s ease; }
+        .nav-item { display: block; padding: 16px 0; font-size: 1.1rem; color: var(--text-main); text-decoration: none; border-bottom: 1px solid #E9ECEF; transition: var(--transition); }
+        .close-nav { position: absolute; top: 20px; right: 24px; background: none; border: none; font-size: 1.5rem; cursor: pointer; color: var(--text-muted); }
+
+        .view { display: none; padding: 88px 24px 40px; min-height: 100vh; animation: fadeIn 0.4s ease; }
+        .view.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* CARDS */
+        .hero-card { border-radius: var(--radius); background-size: cover; background-position: center; position: relative; overflow: hidden; margin-bottom: 24px; box-shadow: var(--shadow-md); cursor: pointer; }
+        .hero-card.large { height: 220px; } .hero-card.standard { height: 140px; }
+        .hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.2) 100%); display: flex; flex-direction: column; justify-content: flex-end; padding: 24px; }
+        .hero-card h2, .hero-card h3 { color: #FFF; position: relative; z-index: 2; margin: 0; }
+        .hero-card p { color: rgba(255,255,255,0.8); font-size: 0.9rem; margin-top: 4px; position: relative; z-index: 2; }
+
+        .action-card { background: var(--surface); border-radius: var(--radius); padding: 20px; margin-bottom: 16px; display: flex; align-items: center; gap: 16px; box-shadow: var(--shadow-sm); cursor: pointer; border: 1px solid #F1F3F5; }
+        .action-card:active { transform: scale(0.98); background: #F8F9FA; }
+        .icon-container { width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; background: var(--gold-light); border-radius: 8px; color: #8A6D3B; }
+        .action-text h4 { font-size: 1.1rem; color: var(--text-main); margin-bottom: 4px; }
+        .action-text p { font-size: 0.85rem; color: var(--text-muted); margin: 0; }
+
+        .back-btn { display: inline-flex; align-items: center; gap: 8px; background: none; border: none; color: var(--gold); font-weight: 600; font-size: 1rem; cursor: pointer; margin-bottom: 24px; }
+        .section-title { color: var(--gold); margin-bottom: 24px; font-size: 1.8rem; }
+        
+        /* 3D ENGINE CONTAINER */
+        #webgl-container { position: fixed; inset: 0; z-index: 3000; display: none; background: #000; }
+        canvas { display: block; width: 100vw; height: 100vh; outline: none; }
+        
+        .env-ui { position: absolute; inset: 0; z-index: 3010; pointer-events: none; }
+        .close-env { pointer-events: auto; position: absolute; top: 32px; left: 24px; background: rgba(0,0,0,0.6); border: 1px solid rgba(255,255,255,0.2); color: white; width: 44px; height: 44px; border-radius: 50%; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px); }
+        .env-controls { pointer-events: auto; position: absolute; bottom: 40px; left: 0; width: 100%; display: flex; justify-content: center; gap: 32px; align-items: center; }
+        
+        /* Movement Controls for Gurudwara */
+        #movement-controls { display: none; position: absolute; bottom: 120px; width: 100%; justify-content: center; gap: 10px; pointer-events: auto; flex-wrap: wrap; }
+        .move-btn { background: rgba(0,0,0,0.7); border: 1px solid var(--gold); color: white; padding: 10px 16px; border-radius: 20px; font-family: 'Inter', sans-serif; cursor: pointer; backdrop-filter: blur(4px); transition: var(--transition); }
+        .move-btn:active { background: var(--gold); color: black; }
+
+        .interaction-btn { background: rgba(0,0,0,0.5); border: 2px solid var(--gold); border-radius: 50%; width: 64px; height: 64px; display: flex; justify-content: center; align-items: center; cursor: pointer; backdrop-filter: blur(4px); transition: var(--transition); }
+        .interaction-btn:active { transform: scale(0.9); background: rgba(197, 160, 89, 0.4); }
+        .interaction-btn svg { width: 28px; height: 28px; fill: var(--gold); }
+
+        #aarti-plate { pointer-events: auto; width: 100px; height: 100px; border-radius: 50%; background: radial-gradient(circle, #FFC107 0%, #E65100 60%, #3E2723 100%); border: 3px solid var(--gold); box-shadow: 0 0 40px rgba(255, 152, 0, 0.8), inset 0 0 20px rgba(255, 255, 255, 0.5); position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%); display: none; touch-action: none; z-index: 3020; }
+    </style>
+</head>
+<body>
+
+    <svg style="display: none;">
+        <symbol id="icon-shrine" viewBox="0 0 24 24"><path d="M12 2L2 12h3v8h14v-8h3L12 2zM12 5.8l5 5V18H7v-7.2l5-5z"/></symbol>
+        <symbol id="icon-book" viewBox="0 0 24 24"><path d="M21 4H7a2 2 0 00-2 2v12a2 2 0 002 2h14V4zM5 18H4V6h1v12z"/></symbol>
+        <symbol id="icon-star" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+        <symbol id="icon-peace" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1-13h2v4.5l3.5 3.5-1.42 1.42L11 11.5V7z"/></symbol>
+        <symbol id="icon-bell" viewBox="0 0 24 24"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z"/></symbol>
+        <symbol id="icon-arrow-left" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></symbol>
+        <symbol id="icon-close" viewBox="0 0 24 24"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+    </svg>
+
+    <header>
+        <div class="logo-text serif">Divine Path</div>
+        <button class="menu-btn" onclick="toggleNav()">
+            <div class="menu-line"></div><div class="menu-line"></div><div class="menu-line"></div>
+        </button>
+    </header>
+
+    <div class="nav-overlay" id="nav-overlay" onclick="toggleNav()"></div>
+    <nav id="side-nav">
+        <button class="close-nav" onclick="toggleNav()"><svg width="24" height="24" fill="currentColor"><use href="#icon-close"></use></svg></button>
+        <h3 class="serif" style="margin-bottom: 24px; color: var(--gold);">Menu</h3>
+        <a href="#" class="nav-item serif" onclick="navigate('home')">Home</a>
+        <a href="#" class="nav-item serif" onclick="navigate('path', 'nationalism')">Nationalism</a>
+        <a href="#" class="nav-item serif" onclick="navigate('path', 'hindu')">Hindu Dharma</a>
+        <a href="#" class="nav-item serif" onclick="navigate('path', 'islam')">Islam</a>
+        <a href="#" class="nav-item serif" onclick="navigate('path', 'sikh')">Sikhism</a>
+        <a href="#" class="nav-item serif" onclick="navigate('path', 'christian')">Christianity</a>
+    </nav>
+
+    <audio id="audio-bg" loop preload="auto"></audio>
+    <audio id="audio-bell" src="https://cdn.pixabay.com/download/audio/2022/03/15/audio_730706eb8b.mp3?filename=temple-bell-104929.mp3" preload="auto"></audio>
+
+    <main id="view-home" class="view active">
+        <div class="hero-card large" style="background-image: url('https://images.unsplash.com/photo-1532375810709-75b1d0d1205a?w=800');" onclick="navigate('path', 'nationalism')">
+            <div class="hero-overlay"><h2 class="serif">Nationalism</h2><p>Peace, unity, and sacrifice.</p></div>
+        </div>
+        <h3 class="serif" style="margin-bottom: 16px; color: var(--text-main);">Spiritual Paths</h3>
+        <div class="hero-card standard" style="background-image: url('https://images.unsplash.com/photo-1582555172866-f73bb12a2ab3?w=800');" onclick="navigate('path', 'hindu')">
+            <div class="hero-overlay"><h3 class="serif">Hindu Dharma</h3></div>
+        </div>
+        <div class="hero-card standard" style="background-image: url('https://images.unsplash.com/photo-1564769625905-50e93615e769?w=800');" onclick="navigate('path', 'islam')">
+            <div class="hero-overlay"><h3 class="serif">Islam</h3></div>
+        </div>
+        <div class="hero-card standard" style="background-image: url('https://images.unsplash.com/photo-1584646098378-0874589d76b1?w=800');" onclick="navigate('path', 'sikh')">
+            <div class="hero-overlay"><h3 class="serif">Sikhism</h3></div>
+        </div>
+        <div class="hero-card standard" style="background-image: url('https://images.unsplash.com/photo-1548625361-ecbf1eb78ba9?w=800');" onclick="navigate('path', 'christian')">
+            <div class="hero-overlay"><h3 class="serif">Christianity</h3></div>
+        </div>
+    </main>
+
+    <main id="view-path" class="view">
+        <button class="back-btn" onclick="goBack()"><svg width="16" height="16" fill="currentColor"><use href="#icon-arrow-left"></use></svg> Back</button>
+        <h1 id="path-title" class="section-title">Title</h1>
+        <div class="action-card" onclick="openEnvironmentSelection()">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-shrine"></use></svg></div>
+            <div class="action-text"><h4 class="serif" id="path-env-title">Go to Architecture</h4><p id="path-env-desc">Immersive spatial experience</p></div>
+        </div>
+        <div class="action-card" onclick="navigate('granth')">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-book"></use></svg></div>
+            <div class="action-text"><h4 class="serif">Holy Scripture</h4><p>Sacred Verses & Meanings</p></div>
+        </div>
+        <div class="action-card" onclick="alert('Today\'s Thought\n\nPeace comes from within. Do not seek it without.\n- Gautama Buddha')">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-star"></use></svg></div>
+            <div class="action-text"><h4 class="serif">Today's Thought</h4><p>Daily spiritual wisdom</p></div>
+        </div>
+        <div class="action-card" onclick="navigate('teachings')">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-peace"></use></svg></div>
+            <div class="action-text"><h4 class="serif">Values & Teachings</h4><p>Core values and philosophy</p></div>
+        </div>
+    </main>
+
+    <main id="view-temples" class="view">
+        <button class="back-btn" onclick="goBack()"><svg width="16" height="16" fill="currentColor"><use href="#icon-arrow-left"></use></svg> Back</button>
+        <h2 class="section-title">Select Temple</h2>
+        <div class="action-card" onclick="start3DExperience('hindu', 'Kali Mata')">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-shrine"></use></svg></div>
+            <div class="action-text"><h4 class="serif">Kali Mata Temple</h4></div>
+        </div>
+        <div class="action-card" onclick="start3DExperience('hindu', 'Lakshmi Narayan')">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-shrine"></use></svg></div>
+            <div class="action-text"><h4 class="serif">Lakshmi Narayan Temple</h4></div>
+        </div>
+        <div class="action-card" onclick="start3DExperience('hindu', 'Shiv')">
+            <div class="icon-container"><svg width="20" height="20" fill="currentColor"><use href="#icon-shrine"></use></svg></div>
+            <div class="action-text"><h4 class="serif">Shiv Temple</h4></div>
+        </div>
+    </main>
+
+    <main id="view-granth" class="view">
+        <button class="back-btn" onclick="goBack()"><svg width="16" height="16" fill="currentColor"><use href="#icon-arrow-left"></use></svg> Back</button>
+        <h2 class="section-title">Scriptures</h2>
+        <p>Your scriptures will load here.</p>
+    </main>
+
+    <main id="view-teachings" class="view">
+        <button class="back-btn" onclick="goBack()"><svg width="16" height="16" fill="currentColor"><use href="#icon-arrow-left"></use></svg> Back</button>
+        <h2 class="section-title">The Path of Peace</h2>
+        <p>The purpose of all faith systems is the cultivation of inner peace and outward harmony.</p>
+    </main>
+
+    <div id="webgl-container">
+        <div class="env-ui">
+            <button class="close-env" onclick="goBack()"><svg width="24" height="24" fill="currentColor"><use href="#icon-close"></use></svg></button>
+            
+            <div id="movement-controls">
+                <button class="move-btn" onclick="setCameraView('drone')">Drone View</button>
+                <button class="move-btn" onclick="setCameraView('ground')">Ground View</button>
+                <button class="move-btn" onclick="walkForward()">Walk Forward</button>
+            </div>
+
+            <div class="env-controls" id="env-controls">
+                <button class="interaction-btn" id="btn-bell" onclick="document.getElementById('audio-bell').play()">
+                    <svg><use href="#icon-bell"></use></svg>
+                </button>
+            </div>
+        </div>
+        <div id="aarti-plate"></div>
+    </div>
+
+    <script>
+        // --- DATA & AUDIO CONFIGURATION ---
+        const appData = {
+            nationalism: {
+                title: "Nationalism", envTitle: "Go to Peace Hall", envDesc: "Bharat Mata Architecture",
+                audio: "https://cdn.pixabay.com/download/audio/2022/10/25/audio_145d8b8e8f.mp3?filename=indian-classical-music-12345.mp3",
+                hasBell: false, hasAarti: false, isMultiTemple: false
+            },
+            hindu: {
+                title: "Hindu Dharma", envTitle: "Go to Architecture", envDesc: "Authentic Stone Temple Layout",
+                audio: "https://cdn.pixabay.com/download/audio/2022/01/18/audio_d0a13f69d2.mp3?filename=om-chanting-114631.mp3", 
+                hasBell: true, hasAarti: true, isMultiTemple: true
+            },
+            islam: {
+                title: "Islam", envTitle: "Go to Mosque", envDesc: "Mosque Prayer Hall Architecture",
+                audio: "https://cdn.pixabay.com/download/audio/2023/04/07/audio_b292ddcfd2.mp3?filename=quran-recitation-145672.mp3", 
+                hasBell: false, hasAarti: false, isMultiTemple: false
+            },
+            sikh: {
+                title: "Sikhism", envTitle: "Go to Gurudwara", envDesc: "Golden Temple Complex Architecture",
+                audio: "https://cdn.pixabay.com/download/audio/2021/08/04/audio_0625c1539c.mp3?filename=kirtan-music-89234.mp3", 
+                hasBell: false, hasAarti: false, isMultiTemple: false
+            },
+            christian: {
+                title: "Christianity", envTitle: "Go to Church", envDesc: "Cathedral Interior",
+                audio: "https://cdn.pixabay.com/download/audio/2022/03/10/audio_c8c8a73467.mp3?filename=church-choir-24512.mp3",
+                hasBell: false, hasAarti: false, isMultiTemple: false
+            }
+        };
+
+        // --- NAVIGATION ENGINE ---
+        let state = { view: 'home', pathId: null };
+        const audioBg = document.getElementById('audio-bg');
+
+        function navigate(view, pathId = null, isBack = false) {
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            document.getElementById('webgl-container').style.display = 'none';
+            if (window.cleanup3D) window.cleanup3D();
+
+            if (document.getElementById('side-nav').classList.contains('open')) toggleNav();
+            if(view === 'home') audioBg.pause();
+
+            state.view = view;
+            if (pathId) state.pathId = pathId;
+
+            if (view === 'path') {
+                const data = appData[state.pathId];
+                document.getElementById('path-title').innerText = data.title;
+                document.getElementById('path-env-title').innerText = data.envTitle;
+                document.getElementById('path-env-desc').innerText = data.envDesc;
+                
+                if (data.audio && audioBg.src !== data.audio) {
+                    audioBg.src = data.audio;
+                    audioBg.play().catch(e => console.log("Audio autoplay policy active."));
+                }
+                document.getElementById('view-path').classList.add('active');
+            } else if (view !== '3d') {
+                document.getElementById(`view-${view}`).classList.add('active');
+            }
+
+            window.scrollTo(0,0);
+            if (!isBack) history.pushState(state, '', `#${view}`);
+        }
+
+        function goBack() {
+            if (state.view === '3d') {
+                if(appData[state.pathId].isMultiTemple) navigate('temples', state.pathId, true);
+                else navigate('path', state.pathId, true);
+            } else if (state.view === 'temples' || state.view === 'granth' || state.view === 'teachings') {
+                navigate('path', state.pathId, true);
+            } else if (state.view === 'path') {
+                navigate('home', null, true);
+            } else {
+                history.back();
+            }
+        }
+
+        window.addEventListener('popstate', (e) => {
+            if (e.state) navigate(e.state.view, e.state.pathId, true);
+            else navigate('home', null, true);
+        });
+        history.replaceState(state, '', '#home');
+
+        function toggleNav() {
+            const nav = document.getElementById('side-nav');
+            const overlay = document.getElementById('nav-overlay');
+            if (nav.classList.contains('open')) {
+                nav.classList.remove('open');
+                overlay.style.opacity = '0';
+                setTimeout(() => overlay.style.display = 'none', 300);
+            } else {
+                overlay.style.display = 'block';
+                setTimeout(() => overlay.style.opacity = '1', 10);
+                nav.classList.add('open');
+            }
+        }
+
+        // --- ADVANCED PROCEDURAL 3D ARCHITECTURE ENGINE ---
+        let scene, camera, renderer, animationId, controls;
+        let targetCamPos = new THREE.Vector3();
+        let currentLookAt = new THREE.Vector3();
+        let targetCamLook = new THREE.Vector3();
+        let camState = { type: 'ground', z: 65 };
+
+        function openEnvironmentSelection() {
+            if (appData[state.pathId].isMultiTemple) navigate('temples');
+            else start3DExperience(state.pathId, null);
+        }
+
+        function start3DExperience(pathId, templeName = '') {
+            state.view = '3d';
+            history.pushState(state, '', `#3d`);
+            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+            
+            const data = appData[pathId];
+            document.getElementById('btn-bell').style.display = data.hasBell ? 'flex' : 'none';
+            document.getElementById('aarti-plate').style.display = data.hasAarti ? 'block' : 'none';
+            document.getElementById('movement-controls').style.display = (pathId === 'sikh') ? 'flex' : 'none';
+            document.getElementById('webgl-container').style.display = 'block';
+
+            init3DScene(pathId, templeName);
+        }
+
+        function init3DScene(pathId, templeName) {
+            const container = document.getElementById('webgl-container');
+            
+            scene = new THREE.Scene();
+            camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
+            
+            renderer = new THREE.WebGLRenderer({ antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+            const existingCanvas = container.querySelector('canvas');
+            if(existingCanvas) existingCanvas.remove();
+            container.insertBefore(renderer.domElement, container.firstChild);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.maxDistance = 150;
+
+            if (pathId === 'hindu') buildHinduTemple(templeName);
+            else if (pathId === 'sikh') buildGoldenTemple();
+            else if (pathId === 'islam') buildMosque();
+            else buildDefaultHall();
+
+            animate();
+        }
+
+        // 1. HINDU TEMPLE ARCHITECTURE
+        function buildHinduTemple(templeName) {
+            scene.fog = new THREE.FogExp2(0x111111, 0.015);
+            camera.position.set(0, 5, 25);
+            targetCamPos.copy(camera.position);
+            currentLookAt.set(0, 5, 0);
+            targetCamLook.copy(currentLookAt);
+            
+            let stoneColor = 0x8B7355; 
+            let accentColor = 0xFFD700; 
+            if(templeName === 'Shiv') stoneColor = 0x333333;
+            if(templeName === 'Kali Mata') accentColor = 0x8B0000;
+
+            const stoneMat = new THREE.MeshStandardMaterial({ color: stoneColor, roughness: 0.9 });
+            
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(80, 80), stoneMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            const pillarGeo = new THREE.CylinderGeometry(1, 1, 12, 16);
+            for(let z = 15; z > -15; z -= 8) {
+                [-8, 8].forEach(x => {
+                    const pillar = new THREE.Mesh(pillarGeo, stoneMat);
+                    pillar.position.set(x, 6, z);
+                    pillar.castShadow = true;
+                    scene.add(pillar);
+                });
+            }
+
+            const sanctumBase = new THREE.Mesh(new THREE.BoxGeometry(24, 4, 20), stoneMat);
+            sanctumBase.position.set(0, 2, -25);
+            sanctumBase.receiveShadow = true;
+            scene.add(sanctumBase);
+
+            const tower1 = new THREE.Mesh(new THREE.CylinderGeometry(6, 11, 12, 4), stoneMat);
+            tower1.position.set(0, 10, -25); tower1.rotation.y = Math.PI / 4; scene.add(tower1);
+            
+            const tower2 = new THREE.Mesh(new THREE.CylinderGeometry(3, 6, 12, 4), stoneMat);
+            tower2.position.set(0, 22, -25); tower2.rotation.y = Math.PI / 4; scene.add(tower2);
+
+            const textureLoader = new THREE.TextureLoader();
+            const frameMat = new THREE.MeshStandardMaterial({ color: accentColor, roughness: 0.3 });
+            
+            const idols = [
+                { url: 'https://lh3.googleusercontent.com/pw/AP1GczPR6rrbuuy2bktiviqCDxQlWQ_BIeFTfBXGvSIEOTUA_CJrduX7ySvpXad1QeUDlwavOzD2vx9qYUiIf77XRCfKKES9YpOzXDsLuwE0872EB_IMnK09WmSlo2kxgIiNFdxqJ5FIRJtJM-IcZA2Nbso=w462-h616-s-no-gm?authuser=0', x: -5 },
+                { url: 'https://lh3.googleusercontent.com/pw/AP1GczPpILYSjplKasefAMQdoza6bMZ2a6yM1Gyjxb95HxvTP5J_npTwkjBCHnDj4BHGv1ANpdIdRwrc1kgk1e8MNmS_uGT9dIv-5Potqr666kfm-1mkq-n4Q2v3RIq4Ew_8w6wM1aUHb-6Zex0L3OlWsME=w442-h616-s-no-gm?authuser=0', x: 0 },
+                { url: 'https://lh3.googleusercontent.com/pw/AP1GczMrb95hZF8wQt4vDluYXTD3r6tlqt9YMYnWsrhooEeGPLfJVgOh1dg8PpUA9Juhf23uIpmwuqNd7QCcgG_7g5JLj8Qo92mktK6z8inbBpY6FhgXEoxHYLoxGj3TBA-lK8xOk9An7zoRDHUBcU5D5z0=w463-h616-s-no-gm?authuser=0', x: 5 }
+            ];
+
+            idols.forEach(data => {
+                textureLoader.load(data.url, function(tex) {
+                    const ratio = tex.image.width / tex.image.height;
+                    const idolGeo = new THREE.BoxGeometry(5 * ratio, 7, 1);
+                    const faceMat = new THREE.MeshBasicMaterial({ map: tex });
+                    const materials = [frameMat, frameMat, frameMat, frameMat, faceMat, frameMat]; 
+                    
+                    const idol = new THREE.Mesh(idolGeo, materials);
+                    idol.position.set(data.x, 7.5, -23);
+                    idol.castShadow = true;
+                    scene.add(idol);
+                });
+            });
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.15));
+            const diya1 = new THREE.PointLight(0xFF8C00, 1.5, 50); diya1.position.set(-6, 6, -18); scene.add(diya1);
+            const diya2 = new THREE.PointLight(0xFF8C00, 1.5, 50); diya2.position.set(6, 6, -18); scene.add(diya2);
+        }
+
+        // 2. SIKHISM GOLDEN TEMPLE ARCHITECTURE (Harmandir Sahib Recreation)
+        function buildGoldenTemple() {
+            scene.background = new THREE.Color(0x87CEEB); // Clear Blue Sky
+            scene.fog = new THREE.FogExp2(0x87CEEB, 0.003);
+
+            // 1. Sarovar (Water Pool) - 200x200
+            const waterGeo = new THREE.PlaneGeometry(200, 200);
+            let water;
+            try {
+                // Realistic mirror reflections using Three.js Reflector
+                water = new THREE.Reflector(waterGeo, {
+                    clipBias: 0.003, textureWidth: window.innerWidth * window.devicePixelRatio,
+                    textureHeight: window.innerHeight * window.devicePixelRatio, color: 0x6688aa
+                });
+            } catch(e) {
+                water = new THREE.Mesh(waterGeo, new THREE.MeshStandardMaterial({ color: 0x447799, roughness: 0.1 }));
+            }
+            water.rotation.x = -Math.PI / 2;
+            scene.add(water);
+
+            // 2. White Marble Walkway (Parikrama)
+            const marbleMat = new THREE.MeshStandardMaterial({ color: 0xFFFAFA, roughness: 0.15 });
+            const pThickness = 2; const pWidth = 30;
+            
+            // Outer edges
+            const w1 = new THREE.Mesh(new THREE.BoxGeometry(260, pThickness, pWidth), marbleMat); w1.position.set(0, 1, 115); scene.add(w1);
+            const w2 = new THREE.Mesh(new THREE.BoxGeometry(260, pThickness, pWidth), marbleMat); w2.position.set(0, 1, -115); scene.add(w2);
+            const w3 = new THREE.Mesh(new THREE.BoxGeometry(pWidth, pThickness, 200), marbleMat); w3.position.set(115, 1, 0); scene.add(w3);
+            const w4 = new THREE.Mesh(new THREE.BoxGeometry(pWidth, pThickness, 200), marbleMat); w4.position.set(-115, 1, 0); scene.add(w4);
+
+            // 3. Guru's Bridge connecting walkway to shrine
+            const bridge = new THREE.Mesh(new THREE.BoxGeometry(10, pThickness, 80), marbleMat);
+            bridge.position.set(0, 1, 60);
+            scene.add(bridge);
+
+            // 4. Central Shrine Architecture (Harmandir Sahib)
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xFFD700, roughness: 0.25, metalness: 0.8 });
+            
+            // Base Level (Marble lower half, Gold upper half)
+            const baseLevel = new THREE.Mesh(new THREE.BoxGeometry(32, 2, 32), marbleMat);
+            baseLevel.position.set(0, 1, 0);
+            scene.add(baseLevel);
+
+            const floor1Marble = new THREE.Mesh(new THREE.BoxGeometry(26, 6, 26), marbleMat);
+            floor1Marble.position.set(0, 5, 0);
+            scene.add(floor1Marble);
+
+            // Cutouts for arches (we simulate this by building walls instead of solid blocks)
+            const wallH = 8;
+            const wThickness = 2;
+            const floor2GoldL = new THREE.Mesh(new THREE.BoxGeometry(wThickness, wallH, 26), goldMat); floor2GoldL.position.set(-12, 12, 0); scene.add(floor2GoldL);
+            const floor2GoldR = new THREE.Mesh(new THREE.BoxGeometry(wThickness, wallH, 26), goldMat); floor2GoldR.position.set(12, 12, 0); scene.add(floor2GoldR);
+            const floor2GoldB = new THREE.Mesh(new THREE.BoxGeometry(26, wallH, wThickness), goldMat); floor2GoldB.position.set(0, 12, -12); scene.add(floor2GoldB);
+            
+            // Front Entrance with gap
+            const floor2GoldF1 = new THREE.Mesh(new THREE.BoxGeometry(8, wallH, wThickness), goldMat); floor2GoldF1.position.set(-9, 12, 12); scene.add(floor2GoldF1);
+            const floor2GoldF2 = new THREE.Mesh(new THREE.BoxGeometry(8, wallH, wThickness), goldMat); floor2GoldF2.position.set(9, 12, 12); scene.add(floor2GoldF2);
+            
+            const roof = new THREE.Mesh(new THREE.BoxGeometry(28, 1, 28), goldMat); roof.position.set(0, 16.5, 0); scene.add(roof);
+
+            // Central Golden Dome
+            const domeBase = new THREE.Mesh(new THREE.CylinderGeometry(8, 8, 3, 32), goldMat);
+            domeBase.position.set(0, 18, 0); scene.add(domeBase);
+            const centralDome = new THREE.Mesh(new THREE.SphereGeometry(8, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2), goldMat);
+            centralDome.position.set(0, 19.5, 0); scene.add(centralDome);
+
+            // 4 Corner Domes (Chhatris)
+            const chhatriPositions = [[-11, -11], [11, -11], [-11, 11], [11, 11]];
+            chhatriPositions.forEach(pos => {
+                const cBase = new THREE.Mesh(new THREE.CylinderGeometry(2, 2, 4, 8), goldMat);
+                cBase.position.set(pos[0], 19, pos[1]); scene.add(cBase);
+                const cDome = new THREE.Mesh(new THREE.SphereGeometry(2.5, 16, 8, 0, Math.PI*2, 0, Math.PI/2), goldMat);
+                cDome.position.set(pos[0], 21, pos[1]); scene.add(cDome);
+            });
+
+            // 5. Interior: Guru Granth Sahib Platform
+            const altar = new THREE.Mesh(new THREE.BoxGeometry(6, 3, 6), marbleMat);
+            altar.position.set(0, 3.5, 0);
+            scene.add(altar);
+            
+            const clothMat = new THREE.MeshStandardMaterial({ color: 0x1E90FF, roughness: 0.9 }); // Blue covering
+            const granth = new THREE.Mesh(new THREE.BoxGeometry(3, 1, 4), clothMat);
+            granth.position.set(0, 5.5, 0);
+            scene.add(granth);
+
+            // Interior Glow
+            const interiorLight = new THREE.PointLight(0xFFD700, 2, 40);
+            interiorLight.position.set(0, 10, 0);
+            scene.add(interiorLight);
+
+            // 6. Human Character on the walkway for Scale
+            const skinMat = new THREE.MeshStandardMaterial({ color: 0xd2b48c });
+            const clothesMat = new THREE.MeshStandardMaterial({ color: 0xeeeeee });
+            const personBody = new THREE.Mesh(new THREE.CylinderGeometry(0.5, 0.5, 2), clothesMat);
+            personBody.position.set(3, 3, 80); scene.add(personBody);
+            const personHead = new THREE.Mesh(new THREE.SphereGeometry(0.4), skinMat);
+            personHead.position.set(3, 4.4, 80); scene.add(personHead);
+
+            // Natural Lighting
+            scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+            const sunLight = new THREE.DirectionalLight(0xfffae6, 1.2);
+            sunLight.position.set(100, 60, 50);
+            scene.add(sunLight);
+
+            // Init Camera
+            setCameraView('drone');
+        }
+
+        // Camera Controls Logic (Drone vs Ground Walk)
+        function setCameraView(type) {
+            camState.type = type;
+            if (type === 'drone') {
+                targetCamPos.set(40, 60, 120); // Wide high angle
+                targetCamLook.set(0, 10, 0);
+            } else {
+                camState.z = 95; // Start at the beginning of the marble walkway bridge
+                targetCamPos.set(0, 5, camState.z);
+                targetCamLook.set(0, 5, 0);
+            }
+        }
+
+        function walkForward() {
+            if (camState.type !== 'ground') setCameraView('ground');
+            // Walk forward along the bridge, stop at the entrance of the shrine
+            camState.z = Math.max(25, camState.z - 15); 
+            targetCamPos.set(0, 5, camState.z);
+            targetCamLook.set(0, 5, camState.z - 20);
+        }
+
+        // 3. ISLAMIC MOSQUE
+        function buildMosque() {
+            camera.position.set(0, 5, 20); targetCamPos.copy(camera.position); currentLookAt.set(0,5,0); targetCamLook.copy(currentLookAt);
+            const carpetMat = new THREE.MeshStandardMaterial({ color: 0x8B0000 });
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(50, 60), carpetMat); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+            
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0xFFF8DC });
+            const backWall = new THREE.Mesh(new THREE.BoxGeometry(50, 20, 2), wallMat); backWall.position.set(0, 10, -20); scene.add(backWall);
+            
+            const mihrab = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 12, 32, 1, false, 0, Math.PI), new THREE.MeshStandardMaterial({ color: 0xD4AF37, side: THREE.BackSide }));
+            mihrab.rotation.x = Math.PI / 2; mihrab.rotation.z = Math.PI / 2; mihrab.position.set(0, 6, -19); scene.add(mihrab);
+            
+            scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+            const centerLight = new THREE.PointLight(0xFFFFFF, 1, 50); centerLight.position.set(0, 15, 0); scene.add(centerLight);
+        }
+
+        function buildDefaultHall() {
+            camera.position.set(0, 5, 20); targetCamPos.copy(camera.position); currentLookAt.set(0,5,0); targetCamLook.copy(currentLookAt);
+            scene.add(new THREE.AmbientLight(0xffffff, 0.8));
+            const floor = new THREE.Mesh(new THREE.PlaneGeometry(40, 40), new THREE.MeshStandardMaterial({color: 0xdddddd})); floor.rotation.x = -Math.PI / 2; scene.add(floor);
+        }
+
+        // Animation Loop with Smooth Camera Lerping
+        function animate() {
+            animationId = requestAnimationFrame(animate);
+            
+            if (camera && controls) {
+                camera.position.lerp(targetCamPos, 0.05);
+                currentLookAt.lerp(targetCamLook, 0.05);
+                controls.target.copy(currentLookAt);
+                controls.update();
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.cleanup3D = function() {
+            if (animationId) cancelAnimationFrame(animationId);
+            if (renderer) renderer.dispose();
+            if (controls) controls.dispose();
+        };
+
+        window.addEventListener('resize', () => {
+            if(camera && renderer) {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+        });
+
+        // --- AARTI DRAG LOGIC ---
+        const aarti = document.getElementById('aarti-plate');
+        let isDraggingAarti = false;
+        aarti.addEventListener('touchstart', () => { isDraggingAarti = true; }, {passive: true});
+        aarti.addEventListener('touchmove', (e) => {
+            if (!isDraggingAarti) return;
+            e.preventDefault(); 
+            const touch = e.touches[0];
+            aarti.style.left = `${touch.clientX}px`;
+            aarti.style.top = `${touch.clientY}px`;
+            aarti.style.transform = `translate(-50%, -50%)`; 
+        }, { passive: false });
+        aarti.addEventListener('touchend', () => { 
+            isDraggingAarti = false; 
+            aarti.style.left = '50%'; aarti.style.top = 'auto'; aarti.style.bottom = '20%'; aarti.style.transform = 'translateX(-50%)';
+        });
+
+    </script>
+</body>
+</html>
