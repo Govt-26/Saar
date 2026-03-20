@@ -2,20 +2,90 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>High Scores</title>
+    <title>Saar Quiz - Leaderboard</title>
     <link rel="stylesheet" href="app.css" />
     <link rel="stylesheet" href="highscores.css" />
-  </head>
-  <body>
-    <div class="container">
-      <div id="highScores" class="flex-center flex-column">
-        <h1 id="finalScore">High Scores</h1>
-        <ul id="highScoresList"></ul>
-        <a class="btn" href="/">Go Home</a>
-      </div>
-    </div>
-    <script src="highscores.js"></script>
-  </body>
-</html>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <style>
+      /* --- GLOBAL RESET & TYPOGRAPHY --- */
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      body {
+        font-family: 'Poppins', sans-serif;
+        background: linear-gradient(135deg, #e0e7ff 0%, #ffffff 100%);
+        color: #1e293b;
+        min-height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        overflow-x: hidden;
+      }
+
+      .container {
+        width: 100%;
+        max-width: 420px; /* Perfect mobile width */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+      }
+
+      /* --- BRANDING HEADER --- */
+      .brand-header {
+        text-align: center;
+        margin-bottom: 20px;
+        animation: fadeDown 0.6s ease-out forwards;
+      }
+
+      .brand-logo {
+        height: 60px;
+        width: auto;
+        border-radius: 12px;
+        margin-bottom: 12px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+      }
+
+      .brand-title {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #0f172a;
+        margin-bottom: 2px;
+        letter-spacing: -0.5px;
+      }
+
+      .brand-subtitle {
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #64748b;
+      }
+
+      /* --- LEADERBOARD CARD --- */
+      .leaderboard-card {
+        background: #ffffff;
+        width: 100%;
+        border-radius: 16px;
+        padding: 28px 24px;
+        box-shadow: 0 10px 30px rgba(37, 99, 235, 0.08);
+        border: 1px solid rgba(255,255,255,0.8);
+        animation: scaleUp 0.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      }
+
+      /* Hide original h1 to replace visually, keeping ID for JS safety */
+      #finalScore {
+        display: none;
+      }
+
+      /* --- SCORES LIST & EMPTY STATE --- */
+      #highScoresList {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 24px;
+        min-height: 60px;
